@@ -1,12 +1,13 @@
 import pygame
 import circleshape
-from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, LINE_WIDTH
+import shot
+from constants import *
 
 
 class Player(circleshape.CircleShape):
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
-
+        self.shot_cooldown = 0
         self.rotation = 0
 
 
@@ -34,7 +35,22 @@ class Player(circleshape.CircleShape):
         rotated_with_speed_vector = rotated_vector * PLAYER_SPEED * dt
         self.position += rotated_with_speed_vector
 
+    def shoot(self):
+        # force wait for cooldown
+        if self.shot_cooldown > 0:
+            return
+        else:
+            self.shot_cooldown = PLAYER_SHOOT_COOLDOWN_SECONDS
+
+        # construct the shot
+        bolt = shot.Shot(self.position.x, self.position.y)
+        unit_vector = pygame.Vector2(0,1)
+        rotated_vector = unit_vector.rotate(self.rotation)
+        rotated_with_speed = rotated_vector * PLAYER_SHOOT_SPEED 
+        bolt.velocity = rotated_with_speed
+
     def update(self, dt):
+        self.shot_cooldown -= dt
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
@@ -48,3 +64,6 @@ class Player(circleshape.CircleShape):
 
         if keys[pygame.K_s]:
             self.move(-dt)
+
+        if keys[pygame.K_SPACE]:
+            self.shoot()
