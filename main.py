@@ -45,10 +45,17 @@ def main():
             stat.update(dt)
 
         for rock in asteroids:
+            # check if any asteroid has hit the player
             if rock.collides_with(player1):
                 log_event("player_hit")
                 print("Game over!")
                 sys.exit()
+            # check if any shot has hit an asteroid
+            for shot in shots:
+                if shot.collides_with(rock):
+                    log_event("asteroid_shot")
+                    rock.kill()
+                    shot.kill()
         
         for thing in drawable:
             thing.draw(screen)
